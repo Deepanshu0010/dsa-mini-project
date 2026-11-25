@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f4ef">
+  <title>Huffman Lab — DSA Mini Project</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20231f;
+      --muted: #73786f;
+      --paper: #f4f4ef;
+      --card: #fffefa;
+      --line: #e5e7df;
+      --green: #216b4b;
+      --green-dark: #174d36;
+      --mint: #e4f1e8;
+      --orange: #eb8958;
+      --shadow: 0 22px 70px rgba(35, 46, 34, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 8% 3%, rgba(225, 239, 224, .85), transparent 32rem),
+        var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .shell { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+    header { height: 82px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(32, 35, 31, .08); }
+    .brand { display: flex; gap: 11px; align-items: center; font-size: 14px; font-weight: 750; letter-spacing: -.02em; }
+    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; color: white; background: var(--green); font-family: Georgia, serif; font-size: 19px; }
+    .tag { padding: 7px 11px; color: var(--green-dark); background: var(--mint); border-radius: 999px; font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    main { padding: 73px 0 56px; }
+    .intro { max-width: 680px; margin: 0 auto 35px; text-align: center; }
+    .eyebrow { margin: 0 0 14px; color: var(--green); font-size: 12px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(36px, 6vw, 58px); line-height: 1.02; letter-spacing: -.055em; font-weight: 760; }
+    .intro-copy { margin: 18px auto 0; max-width: 520px; color: var(--muted); font-size: 16px; line-height: 1.65; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(275px, .65fr); gap: 18px; align-items: stretch; max-width: 900px; margin: 0 auto; }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+    .upload-panel { padding: 25px; }
+    .panel-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .panel-heading h2 { margin: 0; font-size: 15px; letter-spacing: -.02em; }
+    .step { color: #949990; font-size: 11px; font-weight: 750; letter-spacing: .1em; }
+    .switch { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px; margin-bottom: 18px; border-radius: 12px; background: #f0f1eb; }
+    .switch button { min-height: 40px; border: 0; border-radius: 9px; background: transparent; color: #73786f; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .switch button[aria-pressed="true"] { color: var(--green-dark); background: white; box-shadow: 0 1px 5px rgba(30, 40, 29, .1); }
+    .dropzone { min-height: 226px; padding: 27px 18px; border: 1.5px dashed #cfd6cb; border-radius: 15px; background: #fbfcf8; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: .18s ease; }
+    .dropzone.dragging { border-color: var(--green); background: #f0f8f1; transform: scale(1.01); }
+    .file-icon { width: 48px; height: 48px; margin-bottom: 13px; display: grid; place-items: center; color: var(--green); background: var(--mint); border-radius: 15px; }
+    .file-icon svg { width: 24px; height: 24px; }
+    .drop-title { margin: 0; font-size: 14px; font-weight: 720; }
+    .drop-sub { margin: 7px 0 14px; color: var(--muted); font-size: 12px; }
+    .browse { padding: 9px 14px; border: 1px solid #d9ddd5; border-radius: 9px; background: white; color: var(--ink); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .browse:hover { border-color: var(--green); color: var(--green-dark); }
+    .file-input { display: none; }
+    .selected-file { display: none; width: 100%; max-width: 390px; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: white; text-align: left; }
+    .selected-file.visible { display: flex; }
+    .file-badge { flex: 0 0 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; color: var(--green-dark); background: var(--mint); font-size: 10px; font-weight: 800; }
+    .file-meta { min-width: 0; flex: 1; }
+    .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 750; }
+    .file-size { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .remove-file { width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #7b8078; font-size: 19px; cursor: pointer; }
+    .remove-file:hover { background: #f1f2ed; }
+    .run-button { width: 100%; min-height: 49px; margin-top: 17px; display: flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 11px; background: var(--green); color: white; font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; transition: background .18s ease, transform .18s ease; }
+    .run-button:hover:not(:disabled) { background: var(--green-dark); transform: translateY(-1px); }
+    .run-button:disabled { opacity: .48; cursor: not-allowed; }
+    .run-button svg { width: 17px; height: 17px; }
+    .result { display: none; margin-top: 14px; padding: 13px 14px; border-radius: 11px; font-size: 12px; line-height: 1.55; }
+    .result.visible { display: block; }
+    .result.success { color: var(--green-dark); background: #edf6ef; }
+    .result.error { color: #963f32; background: #fff0eb; }
+    .side-panel { padding: 24px 23px; display: flex; flex-direction: column; }
+    .side-label { margin: 0 0 16px; color: #838980; font-size: 10px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .side-title { margin: 0; font-size: 21px; line-height: 1.2; letter-spacing: -.04em; }
+    .side-copy { margin: 10px 0 21px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+    .flow { display: flex; flex-direction: column; gap: 8px; margin: 0 0 19px; }
+    .flow-item { display: flex; align-items: center; gap: 10px; color: #555c53; font-size: 11px; font-weight: 650; }
+    .flow-dot { width: 24px; height: 24px; display: grid; place-items: center; border: 1px solid #dce5db; border-radius: 8px; color: var(--green); background: #f4f9f3; font-size: 10px; font-weight: 800; }
+    .flow-line { width: 1px; height: 8px; margin: -7px 0 -7px 11px; background: #dce5db; }
+    .note { margin-top: auto; padding: 12px; border-radius: 10px; background: #f4f4ef; color: #72776f; font-size: 10px; line-height: 1.55; }
+    .note strong { color: #444b42; }
+    footer { padding: 20px 0 26px; border-top: 1px solid rgba(32, 35, 31, .08); color: #858a82; text-align: center; font-size: 11px; }
+    .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.45); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 720px) {
+      main { padding-top: 48px; }
+      .workspace { grid-template-columns: 1fr; max-width: 520px; }
+      .side-panel { min-height: 235px; }
+      .intro-copy { font-size: 14px; }
+    }
+    @media (max-width: 430px) {
+      .shell { width: min(100% - 24px, 1080px); }
+      header { height: 68px; }
+      .tag { font-size: 9px; }
+      .upload-panel { padding: 17px; }
+      .dropzone { min-height: 205px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand"><span class="brand-mark">H</span><span>Huffman Lab</span></div>
+      <span class="tag">DSA mini project</span>
+    </header>
+
+    <main>
+      <section class="intro">
+        <p class="eyebrow">Lossless file compression</p>
+        <h1>Make text files<br>smaller. Restore them exactly.</h1>
+        <p class="intro-copy">Use Huffman coding to turn a text file into a compact binary archive, then decompress it whenever you need the original back.</p>
+      </section>
+
+      <section class="workspace" aria-label="File compressor">
+        <div class="panel upload-panel">
+          <div class="panel-heading"><h2>Choose an operation</h2><span class="step">STEP 01 / 02</span></div>
+          <div class="switch" role="group" aria-label="Operation">
+            <button id="compressMode" type="button" aria-pressed="true">Compress file</button>
+            <button id="decompressMode" type="button" aria-pressed="false">Decompress archive</button>
+          </div>
+
+          <div id="dropzone" class="dropzone">
+            <div id="emptyState">
+              <div class="file-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10z"/><path d="M13 3v7h7M8 15h8M8 18h5"/></svg></div>
+              <p class="drop-title" id="dropTitle">Drop a text file here</p>
+              <p class="drop-sub" id="dropSub">or browse files from your computer</p>
+              <button class="browse" id="browseButton" type="button">Browse files</button>
+            </div>
+            <div id="selectedFile" class="selected-file">
+              <span id="fileBadge" class="file-badge">TXT</span>
+              <div class="file-meta"><div id="fileName" class="file-name"></div><div id="fileSize" class="file-size"></div></div>
+              <button id="removeFile" class="remove-file" type="button" aria-label="Remove selected file">×</button>
+            </div>
+            <input id="fileInput" class="file-input" type="file" accept=".txt,text/plain">
+          </div>
+
+          <button id="runButton" class="run-button" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 17v3h14v-3"/></svg>
+            <span id="runLabel">Compress and download</span>
+          </button>
+          <div id="result" class="result" role="status" aria-live="polite"></div>
+        </div>
+
+        <aside class="panel side-panel">
+          <p class="side-label">What happens next</p>
+          <h2 class="side-title">Your file, encoded<br>with Huffman codes.</h2>
+          <p class="side-copy">The compressor counts byte frequencies and gives shorter codes to common bytes. The archive carries the tree needed to restore every byte.</p>
+          <div class="flow" aria-label="Process steps">
+            <div class="flow-item"><span class="flow-dot">01</span>Choose a file and operation</div>
+            <div class="flow-line"></div>
+            <div class="flow-item"><span class="flow-dot">02</span>Encode or decode locally</div>
+            <div class="flow-line"></div>
+            <div class="flow-item"><span class="flow-dot">03</span>Download your result</div>
+          </div>
+          <div class="note"><strong>Lossless by design.</strong> Compression works on raw bytes, so UTF-8 characters, punctuation, spaces, and line endings are restored exactly. Small files may not get smaller.</div>
+        </aside>
+      </section>
+    </main>
+    <footer>Huffman Lab <span aria-hidden="true">·</span> Python-powered DSA project</footer>
+  </div>
+
+  <script>
+    (() => {
+      const input = document.getElementById('fileInput');
+      const dropzone = document.getElementById('dropzone');
+      const compressButton = document.getElementById('compressMode');
+      const decompressButton = document.getElementById('decompressMode');
+      const selectedFile = document.getElementById('selectedFile');
+      const emptyState = document.getElementById('emptyState');
+      const runButton = document.getElementById('runButton');
+      const result = document.getElementById('result');
+      let mode = 'compress';
+      let file = null;
+      let busy = false;
+
+      const prettyBytes = (bytes) => {
+        if (bytes < 1024) return `${bytes} bytes`;
+        const units = ['KB', 'MB', 'GB'];
+        let value = bytes / 1024;
+        let unit = 0;
+        while (value >= 1024 && unit < units.length - 1) { value /= 1024; unit += 1; }
+        return `${value.toFixed(value < 10 ? 1 : 0)} ${units[unit]}`;
+      };
+
+      function showResult(message, kind) {
+        result.textContent = message;
+        result.className = `result visible ${kind}`;
+      }
+
+      function updateFile(nextFile) {
+        file = nextFile || null;
+        result.className = 'result';
+        if (!file) {
+          input.value = '';
+          selectedFile.classList.remove('visible');
+          emptyState.style.display = '';
+          runButton.disabled = true;
+          return;
+        }
+        selectedFile.classList.add('visible');
+        emptyState.style.display = 'none';
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = prettyBytes(file.size);
+        document.getElementById('fileBadge').textContent = mode === 'compress' ? 'TXT' : 'HUF';
+        runButton.disabled = busy;
+      }
+
+      function setMode(nextMode) {
+        mode = nextMode;
+        const compressing = mode === 'compress';
+        compressButton.setAttribute('aria-pressed', String(compressing));
+        decompressButton.setAttribute('aria-pressed', String(!compressing));
+        input.accept = compressing ? '.txt,text/plain' : '.huf,application/octet-stream';
+        document.getElementById('dropTitle').textContent = compressing ? 'Drop a text file here' : 'Drop a .huf archive here';
+        document.getElementById('dropSub').textContent = compressing ? 'or browse files from your computer' : 'Choose an archive created by Huffman Lab';
+        document.getElementById('runLabel').textContent = compressing ? 'Compress and download' : 'Decompress and download';
+        if (file) document.getElementById('fileBadge').textContent = compressing ? 'TXT' : 'HUF';
+        result.className = 'result';
+      }
+
+      compressButton.addEventListener('click', () => setMode('compress'));
+      decompressButton.addEventListener('click', () => setMode('decompress'));
+      document.getElementById('browseButton').addEventListener('click', () => input.click());
+      document.getElementById('removeFile').addEventListener('click', () => updateFile(null));
+      input.addEventListener('change', () => updateFile(input.files[0]));
+
+      for (const eventName of ['dragenter', 'dragover']) {
+        dropzone.addEventListener(eventName, (event) => { event.preventDefault(); dropzone.classList.add('dragging'); });
+      }
+      for (const eventName of ['dragleave', 'drop']) {
+        dropzone.addEventListener(eventName, (event) => { event.preventDefault(); dropzone.classList.remove('dragging'); });
+      }
+      dropzone.addEventListener('drop', (event) => {
+        const dropped = event.dataTransfer.files[0];
+        if (dropped) updateFile(dropped);
+      });
+
+      runButton.addEventListener('click', async () => {
+        if (!file || busy) return;
+        busy = true;
+        runButton.disabled = true;
+        runButton.innerHTML = '<span class="spinner" aria-hidden="true"></span><span>Working on your file…</span>';
+        result.className = 'result';
+        try {
+          const response = await fetch(`/api/${mode}`, {
+            method: 'POST',
+            headers: { 'X-File-Name': encodeURIComponent(file.name) },
+            body: file
+          });
+          if (!response.ok) {
+            const detail = await response.json();
+            throw new Error(detail.error || 'The operation failed.');
+          }
+          const blob = await response.blob();
+          const disposition = response.headers.get('Content-Disposition') || '';
+          const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+          const fallback = disposition.match(/filename="?([^";]+)"?/i);
+          const outputName = encoded ? decodeURIComponent(encoded[1]) : (fallback ? fallback[1] : `${file.name}.huf`);
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = outputName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+          const outputSize = Number(response.headers.get('X-Output-Bytes') || blob.size);
+          if (mode === 'compress') {
+            const delta = file.size - outputSize;
+            const detail = delta > 0 ? `Saved ${prettyBytes(delta)}.` : `Archive is ${prettyBytes(Math.abs(delta))} larger; this file does not compress well.`;
+            showResult(`Compressed ${prettyBytes(file.size)} to ${prettyBytes(outputSize)}. ${detail} Download started.`, 'success');
+          } else {
+            showResult(`Restored ${prettyBytes(outputSize)}. Download started.`, 'success');
+          }
+        } catch (error) {
+          showResult(error.message || 'Something went wrong. Please try again.', 'error');
+        } finally {
+          busy = false;
+          runButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 17v3h14v-3"/></svg><span id="runLabel">' + (mode === 'compress' ? 'Compress and download' : 'Decompress and download') + '</span>';
+          runButton.disabled = !file;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
